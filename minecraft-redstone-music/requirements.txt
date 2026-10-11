@@ -1,0 +1,11 @@
+# minecraft-redstone-music (Family A / RedPiano) - Python build-script dependencies
+#
+# Minimum Python: 3.7+  (the scripts stay 3.8+-friendly: no PEP-604 `X | Y` type hints,
+# no `match`/`case`; the hard floor is `sys.stdout.reconfigure(...)`, a 3.7 API, plus f-strings).
+# Verified on Python 3.11.9, the version used to author/test the poc generators.
+#
+# Only one runtime dependency: mido, for reading MIDI files.
+# Pinned to the version the proven poc generators (poc/45, poc/46, poc/48) were
+# authored and verified against. mido 1.3.x is a stable, zero-extra-dependency
+# pure-Python MIDI library (it does NOT require python-rtmidi for file parsing).
+mido==1.3.3
