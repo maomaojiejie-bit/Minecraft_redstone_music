@@ -1,104 +1,69 @@
-<div align="center">
+# McMusicMaker · MIDI → Minecraft 红石音乐机
 
-# McMusicMaker · 红石音乐机
+把一个 **MIDI 文件** 变成能在 Minecraft Java 版里自动演奏的 **红石音乐机器**。
 
-把 MIDI 变成 Minecraft 里真正会演奏的音符盒红石机器。
+运行时 = **数据包 + 资源包 `qzpno_mv` + RedPiano 模组 + Fabric API**：数据包经模组驱动真实音符盒，
+资源包提供钢琴 / 贝斯 / 主音 / 铺底 / 鼓组采样。`--mc-version` 一个参数即可让数据包、资源包、
+模组与安装自动对齐目标版本（支持 **1.21 – 1.21.10**，默认与已验证锚点为 **1.21.8**）。
 
-[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-orange.svg?style=flat-square)](LICENSE)
-[![Minecraft: Java 1.21–1.21.10](https://img.shields.io/badge/Minecraft-Java%201.21%E2%80%931.21.10-62B47A.svg?style=flat-square)](minecraft-redstone-music/docs/VERSION_TACTICS.md)
-[![Windows](https://img.shields.io/badge/交付-Windows-4B8BF5.svg?style=flat-square)](#环境要求)
+## 主要功能
 
-<a href="docs/assets/skill_video.mp4"><img src="docs/assets/hero.gif" width="640" alt="McMusicMaker 演示"></a>
+- **MIDI → 机器**：解析 MIDI，生成红石机器、数据包、资源包与安装器（`dist/`）。
+- **多种形态**：`straight` / `swave` / `inplace` / `multilane`（匀速跑道为当前默认）。
+- **红石音乐工作室（GUI）**：Windows 桌面界面，覆盖选曲检查、生成、音效包、3D 预览、在线音色库与部署。
+- **自定义音色包**：真实采样、MuseScore 4、FL Studio、在线 SoundFont（.sf2）均可生成资源包并试听。
+- **一键部署**：生成 `DEPLOY_TO_GAME.bat`，本机双击即可装进游戏。
+- **多版本兼容**：`binaries/` 内置各版本预编译模组 jar。
 
-**▶ [播放完整演示视频（57 秒 · 五种机型、走线设计器、命令方块编辑器）](docs/assets/skill_video.mp4)**
+## 仓库结构
 
-</div>
+| 目录 | 说明 |
+|---|---|
+| `minecraft-redstone-music/` | 核心 CLI 与构建脚本（skill），详见其 `README.md` / `QUICKSTART.md` |
+| `studio/` | 红石音乐工作室 Windows GUI |
+| `mod/redpiano/` | RedPiano Fabric 模组源码（Java 21） |
+| `binaries/` | 各 MC 版本预编译模组 jar + 清单 |
+| `poc/` | 早期概念验证生成器（历史参考，非生产入口） |
+| `docs/` | 演示素材与开发过程记录（历史文档，可能与当前实现不一致） |
 
----
+## 快速开始
 
-## 它能做什么
+### 图形界面（首次推荐）
 
-- 输入一首 MIDI（也可以先给 MP3），分析歌曲并选择适合的红石机器
-- 把声部安排成钢琴、贝斯、主音、铺底和鼓
-- 生成数据包、资源包和所需模组，输出可双击安装的 `DEPLOY_TO_GAME.bat`
-- 最终由 Minecraft 世界里的**真实音符盒和红石线路**演奏，而不是播放原曲音频
-
-## 两种使用方式
-
-### 1. 红石音乐工作室（推荐）
-
-双击 `启动红石音乐工作室.bat`，或运行：
+双击仓库根目录的 `启动红石音乐工作室.bat`，或命令行：
 
 ```powershell
 python redstone_music_studio.py
 ```
 
-功能：歌曲检查、机器生成（`inplace` / `swave` / `multilane` / `tube`）、3D 预览、音效包（NeuralNote / MuseScore / FL Studio / 在线 SoundFont）、试听预览、一键安装、项目保存。详细说明见 [studio/README.md](studio/README.md)。
+### 命令行
 
-### 2. 交给 AI agent
-
-用 Codex、Claude Code 或其他可读写文件的 agent 打开整个仓库，发送：
-
-```text
-请使用仓库里的 minecraft-redstone-music skill，帮我把一首歌做成 Minecraft 红石音乐机。
-我的 Minecraft 是 Java 版，版本是【填写版本】。
-歌曲文件在【填写路径】。
-存档在【填写路径；不知道就先帮我找】。
+```bash
+cd minecraft-redstone-music
+pip install -r requirements.txt
+python scripts/prepare_all.py --midi assets/demo.mid --form swave --ns demo \
+    --origin 0 0 255 --mc-version 1.21.8 \
+    --world-dir "<存档目录>/saves/<世界>/datapacks" --profile-dir "<.minecraft 目录>"
 ```
 
-详细工作流见 [minecraft-redstone-music/SKILL.md](minecraft-redstone-music/SKILL.md)。
-
-## 机型选择
-
-| 机型 | 特点 | 适合 |
-|---|---|---|
-| `inplace` 原地紧凑型 | 占地最小，音符集中 | 长歌、小场地、稳定听歌 |
-| `swave` S 形折线型 | 线路折返成 S 形，脉冲沿线可见 | 兼顾观赏与占地 |
-| `straight` 直线型 | 沿直线铺开，结构最直观 | 短歌、教学、超长空地 |
-| `custom` 自定义路线 | 浏览器设计器自绘路线 | 绕建筑或景观 |
-| `multilane` 多轨并行型 | 声部分轨并行，同刻音符横向对齐 | 大型舞台效果 |
-| `tube` 圆环音轨型 | 圆环音轨 + 中心直线通道 | 工作室生成的环绕型舞台 |
-
-## 游戏内必敲指令
-
-`<ns>` 为构建时的命名空间：
-
-```mcfunction
-/reload
-/tick rate 80
-/function <ns>:setup
-```
-
-控制台按钮：`play` / `stop` / `view` / `preload` / `cfg/polytoggle` / `cfg/humantoggle` / `stand` / `cam`。
-
-听完后 `/tick rate 20` 还原。
-
-## 安装
-
-构建完成后，双击 `dist\DEPLOY_TO_GAME.bat`，重启游戏，按 agent/工作室提示启用资源包并输入命令。安装回执见 `dist\DEPLOY_RECEIPT.txt`。
+跑完后由**你本人双击** `dist/DEPLOY_TO_GAME.bat` 安装，再按 `QUICKSTART.md` 的清单进游戏。
+（脚本依赖仓库结构，务必整仓 clone，不能只拷 `minecraft-redstone-music/` 子目录。）
 
 ## 环境要求
 
-- Windows
-- Minecraft Java Edition 1.21–1.21.10
-- 存档开启作弊，或拥有 OP 权限
-- 安装模组后需重启一次游戏
+- **Windows**（安装器为 `.bat`，目前仅 Windows 交付）
+- Python 3.8+，依赖仅 `mido`
+- Minecraft Java 版 1.21 – 1.21.10，已装 Fabric Loader + Fabric API
+- 需要重新构建模组源码时：JDK 21 + Gradle
 
-## 更多文档
+## 文档
 
-- [Skill 完整工作流程](minecraft-redstone-music/SKILL.md)
-- [游戏内操作与排错](minecraft-redstone-music/QUICKSTART.md)
-- [模组与资源包说明](minecraft-redstone-music/BINARIES.md)
-- [版本适配策略](minecraft-redstone-music/docs/VERSION_TACTICS.md)
-- [工作室详细说明](studio/README.md)
-- [开发记录](STUDIO_CONTEXT.md)
+- [minecraft-redstone-music/README.md](minecraft-redstone-music/README.md)：完整说明与开场提示词
+- [minecraft-redstone-music/QUICKSTART.md](minecraft-redstone-music/QUICKSTART.md)：从 `.mid` 到游戏内出声的分步清单
+- [studio/README.md](studio/README.md)：GUI 各页功能
+- [docs/history/](docs/history/)：开发过程记录（历史）
 
 ## 许可
 
-代码以 [PolyForm Noncommercial 1.0.0](LICENSE) 发布，仅限非商业使用；商用授权请联系作者。
-
-随包钢琴采样 Salamander Grand Piano v3 (CC BY 3.0)，署名见资源包内 `CREDITS.txt`。
-
-<div align="center">
-<sub>把你想听的歌交给工作室或 agent，剩下的交给它。</sub>
-</div>
+[PolyForm Noncommercial License 1.0.0](LICENSE)，仅限非商业用途。
+采样音色版权与署名见资源包内 `CREDITS.txt`。
